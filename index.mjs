@@ -1,5 +1,6 @@
 import { MongoClient, ServerApiVersion } from 'mongodb';
 export const handler = async (event) => {
+    const payload = JSON.parse(event.body)
     try{
         const uri = "mongodb+srv://beodwilson:KR4wiDfW9b4aufzK@voicegpt.tjkpcx1.mongodb.net/?retryWrites=true&w=majority";
         // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -13,14 +14,14 @@ export const handler = async (event) => {
         await client.connect()
         const database = client.db("voicegpt")
         const users = database.collection(("users"))
-        const userRecord = await users.findOne({oauthCode: event.oauthCode})
+        const userRecord = await users.findOne({oauthCode: payload.oauthCode})
         const today = new Date()
         if(!userRecord){
-            await users.insertOne({numberOfVisits: 1, oauthCode: event.oauthCode, lastLogin:today})
+            await users.insertOne({numberOfVisits: 1, oauthCode: payload.oauthCode, lastLogin:today})
         }
         else {
             await users.updateOne(
-                { "oauthCode" : event.oauthCode  },
+                { "oauthCode" : payload.oauthCode  },
                 {
                     $set: {numberOfVisits: userRecord.numberOfVisits+1}
                 },
